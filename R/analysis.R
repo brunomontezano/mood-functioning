@@ -315,7 +315,12 @@ rf_rec <- recipes::recipe(outcome ~ ., data = mood_train) |>
                                        top_p = 10)
   
 # Check how preprocessing for the logistic regression model goes
-log_rec |> 
+log_processed <- log_rec |> 
+  recipes::prep() |> 
+  recipes::bake(new_data = NULL)
+
+# Check how preprocessing for the logistic regression model goes
+rf_processed <- rf_rec |> 
   recipes::prep() |> 
   recipes::bake(new_data = NULL)
 
@@ -333,7 +338,7 @@ rf_wf <- workflows::workflow() |>
 log_rs <- tune::tune_grid(
   object = log_wf,
   resamples = folds,
-  grid = grid_values,
+  grid = log_grid,
   control = tune::control_grid(
     save_pred = TRUE,
     allow_par = TRUE,
@@ -346,10 +351,10 @@ log_rs <- tune::tune_grid(
 )
 
 # Fit RF resamples
-log_rs <- tune::tune_grid(
-  object = log_wf,
+rf_rs <- tune::tune_grid(
+  object = rf_wf,
   resamples = folds,
-  grid = log_grid,
+  grid = 10,
   control = tune::control_grid(
     save_pred = TRUE,
     allow_par = TRUE,
