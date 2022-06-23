@@ -81,7 +81,7 @@ subsample_with_outcome <- subsample_with_outcome |>
       "No"
     ),
     past_hypo_or_mania = dplyr::if_else(mini_d06ps_t2 == 1 |
-                                          mini_d07ps_t2 == 1,
+                                        mini_d07ps_t2 == 1,
                                         "Yes", "No"),
     past_episode = dplyr::case_when(
       past_depressed == "Yes" &
@@ -126,6 +126,15 @@ sub_with_features <- subsample_with_outcome |>
     ))
   ) |>
   dplyr::ungroup() |>
+  #dplyr::mutate(
+  #  abuso_emocional = as.factor(dplyr::if_else(abuso_emocional >= 10,
+  #                                             "Yes", "No")),
+  #  abuso_fisico = as.factor(dplyr::if_else(abuso_fisico >= 8, "Yes", "No")),
+  #  abuso_sexual = as.factor(dplyr::if_else(abuso_sexual >= 8, "Yes", "No")),
+  #  neg_emocional = as.factor(dplyr::if_else(neg_emocional >= 15,
+  #                                           "Yes", "No")),
+  #  neg_fisica = as.factor(dplyr::if_else(neg_fisica >= 8, "Yes", "No"))
+  #) |> 
   dplyr::mutate(
     religiaodic_t1 = as.factor(dplyr::if_else(religiaodic_t1 == 1, "sim", "não")),
     forcsex_t1 = as.factor(dplyr::if_else(
