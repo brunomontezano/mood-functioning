@@ -384,3 +384,6 @@ rf_rs |>
 log_rs |> 
   tune::show_best(metric = "roc_auc",
                   n = 10)
+
+rf_best <- tune::select_best(rf_rs, "roc_auc")
+
