@@ -49,17 +49,9 @@ subsample <- raw |>
   )
 
 subsample_with_outcome <- subsample |>
-  # Transformar labels do SPSS em fator
-  # Transform SPSS labels in factor levels
   haven::as_factor() |>
-  # Limpar nomes de variáveis
-  # Improve variable names
   janitor::clean_names() |>
-  # Criar desfecho de disfuncionalidade
-  # Create outcome based on FAST score
-  dplyr::mutate(outcome = relevel(as.factor(
-    dplyr::if_else(fast_sum_t2 > 11, "Yes", "No")
-  ), ref = "No"))
+  dplyr::mutate(outcome = as.numeric(fast_sum_t2))
 
 # Check how the outcome is distributed
 # Looks like we have 89 subjects with impairment
@@ -283,7 +275,7 @@ mood_train |>
 # Create k-fold cv object
 folds <- rsample::vfold_cv(data = mood_train,
                            v = 5,
-                           repeats = 10,
+                           repeats = 5,
                            strata = "outcome")
 
 folds
@@ -295,9 +287,9 @@ log_grid <- dials::grid_regular(
 )
 
 # Specify logistic regression model (LASSO)
-log_spec <- parsnip::logistic_reg(mixture = 1, penalty = tune::tune()) |> 
+log_spec <- parsnip::linear_reg(mixture = 1, penalty = tune::tune()) |> 
   parsnip::set_engine("glmnet") |> 
-  parsnip::set_mode("classification")
+  parsnip::set_mode("regression")
 
 # Create recipe for LASSO model
 log_rec <- recipes::recipe(outcome ~ ., data = mood_train) |> 
@@ -308,17 +300,16 @@ log_rec <- recipes::recipe(outcome ~ ., data = mood_train) |>
   recipes::step_impute_median(recipes::all_numeric_predictors()) |> 
   recipes::step_impute_mode(recipes::all_nominal_predictors()) |> 
   recipes::step_nzv(recipes::all_predictors()) |> 
-  recipes::step_dummy(recipes::all_nominal_predictors(), one_hot = FALSE) #|> 
-  #recipeselectors::step_select_roc(recipes::all_predictors(),
-  #                                 outcome = "outcome",
-  #                                 top_p = 10)
+  recipes::step_dummy(recipes::all_nominal_predictors(), one_hot = FALSE)# |> 
+  #recipeselectors::step_select_boruta(recipes::all_predictors(),
+  #                                 outcome = "outcome")
 
 # Specify random forest model
 rf_spec <- parsnip::rand_forest(trees = 1000,
                                 min_n = tune::tune(),
                                 mtry = tune::tune()) |> 
   parsnip::set_engine("ranger", importance = "impurity") |> 
-  parsnip::set_mode("classification")
+  parsnip::set_mode("regression")
 
 # Create recipe for the random forest model
 rf_rec <- recipes::recipe(outcome ~ ., data = mood_train) |> 
@@ -371,10 +362,16 @@ log_rs <- tune::tune_grid(
     verbose = TRUE,
     save_workflow = TRUE
   ),
-  metrics = yardstick::metric_set(yardstick::roc_auc,
-                                  yardstick::bal_accuracy,
-                                  yardstick::ppv)
+  metrics = yardstick::metric_set(yardstick::rmse,
+                                  yardstick::mae,
+                                  yardstick::rsq)
 )
+
+log_rs |> 
+  tune::show_best("rsq")
+
+log_rs |> 
+  tune::show_best("mae")
 
 # Fit RF resamples
 rf_rs <- tune::tune_grid(
@@ -387,19 +384,19 @@ rf_rs <- tune::tune_grid(
     verbose = TRUE,
     save_workflow = TRUE
   ),
-  metrics = yardstick::metric_set(yardstick::roc_auc,
-                                  yardstick::bal_accuracy,
-                                  yardstick::ppv)
+  metrics = yardstick::metric_set(yardstick::rmse,
+                                  yardstick::mae,
+                                  yardstick::rsq)
 )
 
 # Check best RF models based on AUC
 rf_rs |> 
-  tune::show_best(metric = "roc_auc",
+  tune::show_best(metric = "rmse",
                   n = 10)
 
 # Check best LASSO models based on AUC
 log_rs |> 
-  tune::show_best(metric = "roc_auc",
+  tune::show_best(metric = "rmse",
                   n = 10)
 
 log_best <- tune::select_best(log_rs, "roc_auc")
