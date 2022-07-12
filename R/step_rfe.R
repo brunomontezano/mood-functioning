@@ -62,14 +62,22 @@ get_profile <- function(x, y){
   
   rfeProfile <- rfe(x = x,
                     y = y, 
-                    sizes = c(25), 
+                    sizes = c(10, 15, 20, 25), 
                     rfeControl = ctrl_rfe)
   
-  #rfeProfile
-  #rfeProfile$optVariables
+  print(length(rfeProfile$optVariables))
   
-  selectedVars <- rfeProfile$variables
-  bestVar <- rfeProfile$control$functions$selectVar(selectedVars, 25)
+  if(length(rfeProfile$optVariables) > 25){
+    selectedVars <- rfeProfile$variables
+    bestVar <- rfeProfile$control$functions$selectVar(selectedVars, 25)
+    print("Greater than 25")
+    
+  } else {
+    bestVar <- rfeProfile$optVariables
+    print("Less than or equal to 25")
+    
+  }
+  
   
   tibble(x %>% select(all_of(bestVar)), y)
   
@@ -82,8 +90,6 @@ prep.step_rfe <- function(x, training, info = NULL, ...) {
   # translate the terms arguments
   x_names <- recipes::recipes_eval_select(x$terms, training, info)
   y_name <- recipes::recipes_eval_select(x$outcome, training, info)
-  print(x_names)
-  print(y_name)
   #y_name <- y_name[1]
   
   
@@ -94,9 +100,9 @@ prep.step_rfe <- function(x, training, info = NULL, ...) {
     
     selected_df <- get_profile(X, y)
     selected_vars <- colnames(selected_df %>% select(-y))
+    print(length(selected_vars))
     
     exclude <- colnames(X)[!colnames(X) %in% selected_vars]
-    print(exclude)
     exclude
     
   } else {
@@ -116,11 +122,6 @@ prep.step_rfe <- function(x, training, info = NULL, ...) {
 }
 
 
-#get_profile(biomass_tr %>% select(-outcome), 
- #           biomass_tr$outcome)
-
-
-library(caret)
 
 bake.step_rfe <- function(object, new_data, ...) {
   
