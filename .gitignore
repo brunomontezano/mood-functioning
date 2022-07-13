@@ -43,3 +43,5 @@ data/
 
 # Cache file
 cache/
+session/
+old_code/
