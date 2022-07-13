@@ -28,6 +28,11 @@ library(tidymodels)
 
 # Filter to get desired sample
 subsample <- raw |>
+  
+  # Limpar nomes de variáveis
+  # Improve variable names
+  janitor::clean_names() |>
+  
   dplyr::filter(
     # Participou do follow-up
     # Participated in follow-up
@@ -43,6 +48,14 @@ subsample <- raw |>
       edmat_t1 == 0 &
       edmmel_t1 == 0 &
       maniahipo_t1 == 0
+    ) & (
+      mini_a08ps_t2    == 0 & 
+        mini_a08atpp_t2  == 0 & 
+        mini_a09ps_t2    == 0 & 
+        mini_a10ps_t2    == 0 &
+        mini_d06ps_t2    == 0 &
+        mini_d07ps_t2    == 0 
+      
     )
 )
 
@@ -70,9 +83,6 @@ subsample_with_outcome <- subsample |>
   # Transformar labels do SPSS em fator
   # Transform SPSS labels in factor levels
   #haven::as_factor() |>
-  # Limpar nomes de variáveis
-  # Improve variable names
-  janitor::clean_names() |>
   # Criar desfecho de disfuncionalidade
   # Create outcome based on FAST score
   dplyr::mutate(outcome = relevel(as.factor(
