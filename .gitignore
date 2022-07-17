@@ -45,3 +45,6 @@ data/
 cache/
 session/
 old_code/
+
+# Figures directory
+figures/

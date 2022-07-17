@@ -1,8 +1,10 @@
 # Evaluation of the best models
+library(tidyverse)
+library(tidymodels)
 
 #load("analysis_with_rfe_tidy_060722.RData")
 
-load("analysis_with_rfe_tidy_090722b.RData")
+load("session/analysis_with_rfe_tidy_090722b.RData")
 
 source("R/functions.R")
 
