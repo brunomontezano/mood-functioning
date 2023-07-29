@@ -3,8 +3,13 @@
 library(tidymodels)
 library(caret)
 
+table(sub_with_features$outcome)
+
+
+
 # Read data ----
 sub_with_features <- readRDS("cache/dataset.rds")
+dim(sub_with_features)
 
 
 source("R/step_rfe.R")
