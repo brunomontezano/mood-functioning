@@ -50,3 +50,4 @@ performance_by_cutoff_healthy.csv
 performance_by_cutoff_other_disorders.csv
 *.docx
 *.RData
+R/utils.R
