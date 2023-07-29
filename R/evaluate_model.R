@@ -1,31 +1,18 @@
 # Evaluation of the best models
+library(tidymodels)
 
-#load("analysis_with_rfe_tidy_060722.RData")
-
-load("analysis_with_rfe_tidy_090722b.RData")
-
+load("session/analysis_with_rfe_tidy_090722b.RData")
 source("R/functions.R")
+source("R/step_rfe.R")
 
 aucs_train
 
 set.seed(1)
 
-
-
 #log_best <- tune::select_best(log_rs, "roc_auc")
 rf_best <- tune::select_best(rf_rs, "roc_auc")
 
 
-# Coeficients LASSO ----
-
-log_coefs <- log_wf %>% 
-  finalize_workflow(log_best) %>%
-  fit(mood_train) %>%
-  extract_fit_parsnip() %>%
-  tidy()
-
-
-log_coefs %>% filter(estimate != 0) %>% arrange(estimate) %>% View()
 
 # Best workflow and best model ----
 
@@ -49,6 +36,7 @@ final_fit <-
   final_wf %>%
   last_fit(mood_split) 
 
+final_fit$.notes
 
 final_fit %>%
   collect_metrics()
@@ -60,6 +48,9 @@ final_fit %>%
 
 
 # Performance metrics ----
+library(tidymodels)
+
+source("R/functions.R")
 
 perf_cutoff_res <- map(seq(0.1, 0.9, by = 0.1), mdl = final_fit, get_perf_by_cutoff) %>% bind_rows()
 perf_cutoff_res <- round(perf_cutoff_res, 2)
@@ -120,16 +111,18 @@ final_fit %>%
 final_fit %>%
   collect_predictions()
 
+#final_fit %>% 
+#  extract_fit_parsnip() %>% 
+#  vip::vip(num_features = 25)
 
+# main_final_model
 final_model <- extract_workflow(final_fit)
 final_model
 
-final_fit %>% 
+final_model %>% 
   extract_fit_parsnip() %>% 
   vip::vip(num_features = 25)
 
-
-
-
-
+#save.image("session/evaluate_model.RData")
+#load("session/evaluate_model.RData")
 
