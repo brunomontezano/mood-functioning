@@ -57,10 +57,10 @@ get_profile <- function(x, y){
   
   set.seed(1)
   
-  ctrl_rfe <- rfeControl(functions = rfFuncs, 
+  ctrl_rfe <- caret::rfeControl(functions = caret::rfFuncs, 
                          method = "LOOCV", verbose = FALSE)
   
-  rfeProfile <- rfe(x = x,
+  rfeProfile <- caret::rfe(x = x,
                     y = y, 
                     sizes = c(10, 15, 20, 25), 
                     rfeControl = ctrl_rfe)

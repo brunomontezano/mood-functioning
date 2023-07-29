@@ -86,6 +86,7 @@ subsample_with_outcome <- subsample |>
 subsample_with_outcome |>
   dplyr::count(outcome)
 
+
 subsample_with_outcome <- subsample_with_outcome |>
   dplyr::filter(!is.na(outcome))
 
@@ -361,7 +362,7 @@ ds %>%
 
 
 # Export data ------------------------------------------------------------------
-#load("sessions/preprocessing.RData")
+#load("session/preprocessing.RData")
 save.image("session/preprocessing.RData")
 
 saveRDS(ds,

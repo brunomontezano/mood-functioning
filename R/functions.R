@@ -30,10 +30,14 @@ get_perf_by_cutoff <- function(cutoff, mdl){
   df <- mdl %>% collect_predictions()
   
   obs <- df$outcome
-  preds <- ifelse(df$.pred_Yes >= cutoff, "Yes", "No")
+  if(!is.factor(obs)) warning("Obs is not a factor!")
   
-  pred_df <- data.frame(outcome = factor(obs, levels = c("No", "Yes")), 
-                        .pred_class = factor(preds, levels = c("No", "Yes")))
+  preds <- factor(ifelse(df$.pred_Yes >= cutoff, "Yes", "No"),
+                     levels = c("No", "Yes"))
+  
+  
+  pred_df <- data.frame(outcome = relevel(obs, ref = "No"), 
+                        .pred_class = relevel(preds, ref = "No"))
   
   
   data.frame(cutoff = cutoff,
