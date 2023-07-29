@@ -1,0 +1,52 @@
+---
+title: "Summary tables"
+author: "Jacson"
+date: "25/11/2021"
+output: word_document
+---
+
+# Tabela descritiva com missing data (sem imputação)
+```{r}
+library(gtsummary)
+
+dt <- readRDS("../cache/dataset.rds")
+
+
+```
+
+```{r}
+dt %>%
+  tbl_summary()
+
+```
+
+
+```{r}
+
+dt %>%
+  tbl_summary(by = outcome) %>% add_p()
+
+```
+
+# Tabela descritiva sem missing data (com imputação)
+```{r}
+library(gtsummary)
+
+load("../session/suppl_main_model_without_rfe_23072022.RData")
+
+dt2 <- rf_processed
+
+saveRDS(dt2, file = "../cache/rf_processed_bag_imputed_24082022.rds")
+```
+
+```{r}
+dt2 %>%
+  tbl_summary()
+
+```
+
+
+```{r}
+dt2 %>%
+  tbl_summary(by = outcome) %>% add_p()
+```
